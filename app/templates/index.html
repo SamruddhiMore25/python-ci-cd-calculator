@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Python Calculator</title>
+</head>
+<body>
+    <h1>Python Calculator</h1>
+
+    <form action="/calculate" method="post">
+        <input type="text" name="a" placeholder="First number" value="{{ a }}" required>
+        <select name="op">
+            <option value="add" {% if op == "add" %}selected{% endif %}>+</option>
+            <option value="sub" {% if op == "sub" %}selected{% endif %}>-</option>
+            <option value="mul" {% if op == "mul" %}selected{% endif %}>×</option>
+            <option value="div" {% if op == "div" %}selected{% endif %}>÷</option>
+        </select>
+        <input type="text" name="b" placeholder="Second number" value="{{ b }}" required>
+        <button type="submit">Calculate</button>
+    </form>
+
+    {% if result is not none %}
+        <p><strong>Result:</strong> {{ result }}</p>
+    {% endif %}
+
+    {% if error %}
+        <p style="color: red;"><strong>Error:</strong> {{ error }}</p>
+    {% endif %}
+</body>
+</html>
