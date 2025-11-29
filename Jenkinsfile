@@ -14,7 +14,7 @@ pipeline {
             steps {
                 cleanWs()
                 // Checkout the latest code from the GitHub repository
-                git branch: 'main', credentialsId: 'SamruddhiMore25', url: 'https://github.com/SamruddhiMore25/python-ci-cd-calculator'
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com/SamruddhiMore25/python-ci-cd-calculator'
             }
         }
         stage ('CI - Build and Test Python code'){
