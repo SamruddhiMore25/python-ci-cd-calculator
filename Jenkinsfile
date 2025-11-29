@@ -1,6 +1,6 @@
 pipeline {
 
-    agent {  label 'Jenkin-Agent'  }
+    agent {  label 'Jenkins-Agent'  }
 
     environment {
         // Use Python 3.12.3 for the build
