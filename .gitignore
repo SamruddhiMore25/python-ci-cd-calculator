@@ -1,0 +1,26 @@
+# Virtual environments
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# VSCode settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Byte-compiled / optimized
+*.pyo
+*.pyd
+
+# Logs
+*.log
+
+# Python egg / build files
+build/
+dist/
+*.egg-info/
