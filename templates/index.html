@@ -3,29 +3,26 @@
 <head>
     <meta charset="UTF-8" />
     <title>Python Calculator</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
 
+    <style>
         body {
             margin: 0;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 40px 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: #cabacc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .card {
+        .calc-card {
             background: #ffffff;
-            padding: 24px 32px 28px;
+            padding: 24px 32px;
             border-radius: 16px;
             box-shadow: 0 14px 35px rgba(0, 0, 0, 0.08);
-            max-width: 420px;
-            width: 100%;
+            width: 360px;
             text-align: center;
+            margin-bottom: 40px;
         }
 
         h1 {
@@ -37,25 +34,15 @@
         .calc-form {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .row {
-            display: flex;
-            gap: 8px;
+            gap: 12px;
         }
 
         input[type="text"],
         select {
-            display: block;
-            padding: 6px 10px;
+            padding: 8px 12px;
             border-radius: 8px;
             border: 1px solid #d1d5db;
             font-size: 14px;
-            max-width: 230px;
-            width: 100%;
-            margin: 0 auto;
         }
 
         input[type="text"]:focus,
@@ -66,67 +53,95 @@
         }
 
         button {
-            align-self: center;
-            padding: 9px 14px;
+            padding: 10px;
             border-radius: 8px;
             border: none;
             background: #2563eb;
-            width: 150px;
             color: white;
             font-size: 15px;
             font-weight: 500;
             cursor: pointer;
-            transition: background 0.15s ease, transform 0.05s ease;
         }
 
         button:hover {
             background: #1d4ed8;
         }
 
-        button:active {
-            transform: translateY(1px);
+        .result { margin-top: 10px; font-size: 16px; }
+        .error { margin-top: 10px; color: #b91c1c; font-size: 15px; }
+
+        .history-container {
+            width: 90%;
+            max-width: 900px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+            position: relative;
         }
 
-        .result,
-        .error {
-            font-size: 15px;
-            margin: 4px 0;
-        }
-
-        .result strong {
+        .history-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
             color: #111827;
         }
 
-        .error {
-            color: #b91c1c;
+        /* NEW: Clear history button style */
+        .clear-btn {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
         }
 
-        .hint {
+        .clear-btn:hover {
+            background: #b91c1c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 10px;
-            font-size: 12px;
-            color: #6b7280;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
         }
     </style>
 </head>
+
 <body>
-    <div class="card">
+
+    <!-- Calculator card -->
+    <div class="calc-card">
         <h1>Python Calculator</h1>
 
         <form class="calc-form" action="/calculate" method="post">
-            <div class="row">
-                <input type="text" name="a" placeholder="First number" value="{{ a }}" required>
-            </div>
-            <div class="row">
-                <select name="op">
-                    <option value="add" {% if op == "add" %}selected{% endif %}>+</option>
-                    <option value="sub" {% if op == "sub" %}selected{% endif %}>−</option>
-                    <option value="mul" {% if op == "mul" %}selected{% endif %}>×</option>
-                    <option value="div" {% if op == "div" %}selected{% endif %}>÷</option>
-                </select>
-            </div>
-            <div class="row">
-                <input type="text" name="b" placeholder="Second number" value="{{ b }}" required>
-            </div>
+            <input type="text" name="a" placeholder="First number" value="{{ a }}" required>
+
+            <select name="op">
+                <option value="add" {% if op == "add" %}selected{% endif %}>+</option>
+                <option value="sub" {% if op == "sub" %}selected{% endif %}>−</option>
+                <option value="mul" {% if op == "mul" %}selected{% endif %}>×</option>
+                <option value="div" {% if op == "div" %}selected{% endif %}>÷</option>
+            </select>
+
+            <input type="text" name="b" placeholder="Second number" value="{{ b }}" required>
+
             <button type="submit">Calculate</button>
         </form>
 
@@ -137,8 +152,42 @@
         {% if error %}
             <p class="error"><strong>Error:</strong> {{ error }}</p>
         {% endif %}
-
-        <p class="hint">FastAPI • Python • Perfect for CI/CD demos</p>
     </div>
+
+    <!-- History Panel -->
+    <div class="history-container">
+
+        <h2>Calculations History</h2>
+
+        <!-- NEW: Clear History Button -->
+        <form action="/clear_history" method="post">
+            <button type="submit" class="clear-btn">Clear History</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>A</th>
+                    <th>Operator</th>
+                    <th>B</th>
+                    <th>Result</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in history %}
+                <tr>
+                    <td>{{ item.a }}</td>
+                    <td>{{ item.operator }}</td>
+                    <td>{{ item.b }}</td>
+                    <td>{{ item.result }}</td>
+                    <td>{{ item.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 </body>
 </html>
