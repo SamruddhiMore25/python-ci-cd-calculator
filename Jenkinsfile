@@ -43,7 +43,8 @@ pipeline {
                                     -Dsonar.projectKey=python-calculator \
                                     -Dsonar.sources=. \
                                     -Dsonar.host.url=http://172.31.20.87:9000 \
-                                    -Dsonar.login=$SONAR_TOKEN
+                                    -Dsonar.login=$SONAR_TOKEN \
+                                    -Dsonar.nodejs.executable=/usr/bin/node
                             """
                         } // end withCredentials
                     } // end script
