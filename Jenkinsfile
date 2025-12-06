@@ -1,23 +1,23 @@
 pipeline {
 
-    agent {  label 'Jenkins-Agent'  }
+    agent { label 'Jenkins-Agent' }
 
     environment {
-        // Use Python 3.12.3 for the build
         PYTHON_VERSION = '3.12.3'
     }
-//--------CI Stages-----------
 
     stages {
 
         stage('CI - Checkout from SCM') {
             steps {
                 cleanWs()
-                // Checkout the latest code from the GitHub repository
-                git branch: 'main', credentialsId: 'github', url: 'https://github.com/SamruddhiMore25/python-ci-cd-calculator'
+                git branch: 'main',
+                    credentialsId: 'github',
+                    url: 'https://github.com/SamruddhiMore25/python-ci-cd-calculator'
             }
         }
-        stage ('CI - Build and Test Python code'){
+
+        stage('CI - Build and Test Python code') {
             steps {
                 sh '''
                     export TESTING=1
@@ -25,7 +25,6 @@ pipeline {
                     . .venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
-                    # run tests (we will adjust this to use unittest instead)
                     pytest || python -m pytest
                 '''
             }
@@ -35,20 +34,23 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonarqube-server') {
                     script {
-                        // Ask Jenkins for the scanner path
-                        scannerHome = tool 'sonarqube-scanner'
-                        }
-                    withCredentials([string(credentialsId: 'jenkins-sonarqube-token', variable: 'SONAR_TOKEN')]) {
-                        sh """
-                            sonar-scanner \
-                            -Dsonar.projectKey=python-calculator \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://172.31.20.87:9000 \
-                            -Dsonar.login=$SONAR_TOKEN
-                        """
-                    }
-                }
+                        def scannerHome = tool 'sonarqube-scanner'
+
+                        withCredentials([string(credentialsId: 'jenkins-sonarqube-token',
+                                                variable: 'SONAR_TOKEN')]) {
+                            sh """
+                                ${scannerHome}/bin/sonar-scanner \
+                                    -Dsonar.projectKey=python-calculator \
+                                    -Dsonar.sources=. \
+                                    -Dsonar.host.url=http://172.31.20.87:9000 \
+                                    -Dsonar.login=$SONAR_TOKEN
+                            """
+                        } // end withCredentials
+                    } // end script
+                } // end withSonarQubeEnv
             }
         }
-      }
-}
+
+    } // end stages
+
+} // end pipeline
