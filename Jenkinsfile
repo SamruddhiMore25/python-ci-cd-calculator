@@ -20,6 +20,7 @@ pipeline {
         stage ('CI - Build and Test Python code'){
             steps {
                 sh '''
+                    export TESTING=1
                     python3 -m venv .venv
                     . .venv/bin/activate
                     pip install --upgrade pip
