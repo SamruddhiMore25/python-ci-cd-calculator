@@ -20,6 +20,7 @@ pipeline {
         stage ('CI - Build and Test Python code'){
             steps {
                 sh '''
+                    export TESTING=1
                     python3 -m venv .venv
                     . .venv/bin/activate
                     pip install --upgrade pip
@@ -27,6 +28,22 @@ pipeline {
                     # run tests (we will adjust this to use unittest instead)
                     pytest || python -m pytest
                 '''
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    withCredentials([string(credentialsId: 'jenkins-sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                        sh """
+                            sonar-scanner \
+                            //-Dsonar.projectKey=python-calculator \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=http://172.31.20.87:9000 \
+                            -Dsonar.login=$SONAR_TOKEN
+                        """
+                    }
+                }
             }
         }
       }
