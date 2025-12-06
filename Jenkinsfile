@@ -37,7 +37,10 @@ pipeline {
                         def scannerHome = tool 'sonarqube-scanner'
                         withCredentials([string(credentialsId: 'jenkins-sonarqube-token',
                                                 variable: 'SONAR_TOKEN')]) {
-                            sh "echo Using Node: $(/usr/bin/node -v)"
+                            sh'''
+                            echo "Using Node:" 
+                            /usr/bin/node -v
+                            '''
                             sh """
                                 ${scannerHome}/bin/sonar-scanner \
                                     -Dsonar.projectKey=python-calculator \
