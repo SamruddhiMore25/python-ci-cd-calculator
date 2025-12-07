@@ -4,6 +4,12 @@ pipeline {
 
     environment {
         PYTHON_VERSION = '3.12.3'
+        APP_NAME = "python-ci-cd-calculator"
+        RELEASE = "1.0.0"
+        DOCKER_USER = 'samdocksimages'
+        DOCKER_PASS = 'dockerhub-token'
+        IMAGE_NAME = "${DOCKER_USER}/${APP_NAME}"
+        IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
     }
 
     stages {
