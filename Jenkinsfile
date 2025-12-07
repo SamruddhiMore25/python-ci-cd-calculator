@@ -54,6 +54,13 @@ pipeline {
                 } // end withSonarQubeEnv
             }
         }
+        stage('Quality Gate') {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false
+                }
+            }
+        }
 
     } // end stages
 
