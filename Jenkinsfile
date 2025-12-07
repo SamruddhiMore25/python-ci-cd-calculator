@@ -67,6 +67,34 @@ pipeline {
                 }
             }
         }
+        stage('Build & Push Docker Image') {
+            steps {
+                script {
+
+                    // Read credentials from Jenkins Credentials Store
+                    withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_PASS')]) {
+
+                        // Name/tag for the image
+                        def appImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
+
+                        // Login
+                        sh """
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        """
+
+                        // Push tagged image
+                        sh """
+                            docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                            docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                            docker push ${IMAGE_NAME}:latest
+                        """
+
+                        // Logout
+                        sh "docker logout"
+                    }
+                }
+            }
+        }
 
     } // end stages
 
