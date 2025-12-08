@@ -67,30 +67,58 @@ pipeline {
                 }
             }
         }
-        stage('Build & Push Docker Image') {
+        stage('Build Docker Image') {
             steps {
                 script {
+                    // Build image once
+                    echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                }
+            }
+        }
 
-                    // Read credentials from Jenkins Credentials Store
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-token', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+        stage('Trivy Security Scan') {
+            steps {
+                script {
+                    echo "Running Trivy scan on image: ${IMAGE_NAME}:${IMAGE_TAG}"
 
-                        // Name/tag for the image
-                        def appImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
+                    sh """
+                        docker pull aquasec/trivy:latest
+                        docker run --rm \
+                            -v /var/run/docker.sock:/var/run/docker.sock \
+                            aquasec/trivy image ${IMAGE_NAME}:${IMAGE_TAG} \
+                            --no-progress \
+                            --scanners vuln \
+                            --severity HIGH,CRITICAL \
+                            --format table \
+                            --exit-code 0
+                    """
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'dockerhub-token',
+                            usernameVariable: 'DOCKER_USER',
+                            passwordVariable: 'DOCKER_PASS'
+                        )
+                    ]) {
 
-                        // Login
+                        echo "Logging in to Docker Hub…"
+                        sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+
+                        echo "Tagging & pushing image…"
                         sh """
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        """
+                            docker tag ${IMAGE_NAME}:${IMAGE_TAG} $DOCKER_USER/python-calculator:${IMAGE_TAG}
+                            docker push $DOCKER_USER/python-calculator:${IMAGE_TAG}
 
-                        // Push tagged image
-                        sh """
-                            docker build -t $DOCKER_USER/python-calculator:$IMAGE_TAG .
-                            docker push $DOCKER_USER/python-calculator:$IMAGE_TAG
-                            docker tag $DOCKER_USER/python-calculator:$IMAGE_TAG $DOCKER_USER/python-calculator:latest
+                            docker tag ${IMAGE_NAME}:${IMAGE_TAG} $DOCKER_USER/python-calculator:latest
                             docker push $DOCKER_USER/python-calculator:latest
                         """
 
-                        // Logout
                         sh "docker logout"
                     }
                 }
