@@ -72,7 +72,7 @@ pipeline {
                 script {
 
                     // Read credentials from Jenkins Credentials Store
-                    withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_PASS')]) {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-token', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
 
                         // Name/tag for the image
                         def appImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
@@ -84,9 +84,10 @@ pipeline {
 
                         // Push tagged image
                         sh """
-                            docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                            docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
-                            docker push ${IMAGE_NAME}:latest
+                            docker build -t $DOCKER_USER/python-calculator:$IMAGE_TAG .
+                            docker push $DOCKER_USER/python-calculator:$IMAGE_TAG
+                            docker tag $DOCKER_USER/python-calculator:$IMAGE_TAG $DOCKER_USER/python-calculator:latest
+                            docker push $DOCKER_USER/python-calculator:latest
                         """
 
                         // Logout
