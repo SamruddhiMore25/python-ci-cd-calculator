@@ -124,6 +124,20 @@ pipeline {
                 }
             }
         }
+        stage('Cleanup Artifacts') {
+            steps {
+                script {
+                    // Remove specific tag image (ignore errors)
+                    sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true"
+
+                    // Remove 'latest' tag (ignore errors)
+                    sh "docker rmi ${IMAGE_NAME}:latest || true"
+
+                    // Optional: prune dangling images
+                    sh "docker image prune -f || true"
+                }
+            }
+        }
 
     } // end stages
 
